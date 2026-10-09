@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TVET Performance Report – JPPKK 2025</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --blue:#1a3c6e;--blue2:#2563a8;--teal:#0e7490;--gold:#c9991a;
+  --green:#15803d;--amber:#d97706;--red:#dc2626;
+  --bg:#f0f4f8;--white:#fff;--border:#d1dce8;--text:#1e293b;--muted:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+
+/* ── SCREEN HEADER ── */
+.app-hdr{background:linear-gradient(135deg,#1a3c6e,#2563a8 55%,#0e7490);color:#fff;padding:16px 28px;display:flex;align-items:center;gap:14px}
+.app-hdr .logo{width:52px;height:52px;background:#c9991a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:19px;color:#1a3c6e;flex-shrink:0}
+.app-hdr h1{font-size:16px;font-weight:800}
+.app-hdr p{font-size:11px;opacity:.85;margin-top:2px}
+.back-btn{margin-left:auto;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:7px;padding:7px 16px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;text-decoration:none;white-space:nowrap}
+.back-btn:hover{background:rgba(255,255,255,.28)}
+
+/* ── FILTER / CONTROL BAR ── */
+.ctrl{background:#fff;border-bottom:1px solid var(--border);padding:12px 28px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ctrl label{font-size:12px;font-weight:700;color:var(--blue)}
+.ctrl select{border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:12.5px;outline:none;background:#fff;min-width:180px}
+.btn{padding:8px 16px;border-radius:7px;border:none;cursor:pointer;font-size:12.5px;font-weight:700;transition:opacity .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{opacity:.85}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-teal{background:var(--teal);color:#fff}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+
+/* ── MAIN LAYOUT ── */
+.main{padding:20px 28px}
+
+/* ── SUMMARY STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:10px;padding:14px 16px;border:1px solid var(--border);border-top:4px solid var(--accent,#aaa);box-shadow:0 1px 5px rgba(0,0,0,.06);text-align:center;cursor:pointer;transition:box-shadow .15s}
+.stat-card:hover,.stat-card.active{box-shadow:0 4px 16px rgba(0,0,0,.14)}
+.stat-card.active{border-top-width:5px}
+.stat-num{font-size:34px;font-weight:900;line-height:1;margin:4px 0}
+.stat-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.stat-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.stat-pct{font-size:11.5px;font-weight:700;margin-top:4px}
+
+/* ── SECTION TITLE ── */
+.sec{font-size:14px;font-weight:800;color:var(--blue);border-left:4px solid var(--gold);padding-left:10px;margin:16px 0 10px}
+
+/* ── CHARTS GRID ── */
+.chart-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:20px}
+.chart-box{background:#fff;border-radius:10px;padding:16px;border:1px solid var(--border);box-shadow:0 1px 5px rgba(0,0,0,.05)}
+.chart-box h3{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:10px;border-left:3px solid var(--gold);padding-left:7px}
+
+/* ── TABLE ── */
+.tbl-wrap{background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.05);margin-bottom:20px}
+.tbl-hdr{background:var(--blue);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+.tbl-hdr h3{font-size:13px;font-weight:700}
+.tbl-hdr span{font-size:11px;opacity:.8}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:#1e4d8c;color:#fff}
+th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap}
+tbody tr{border-bottom:1px solid #f1f5f9;transition:background .1s}
+tbody tr:hover{background:#f0f6ff}
+tbody tr:nth-child(even){background:#fafcff}
+tbody tr:nth-child(even):hover{background:#edf5ff}
+td{padding:7px 10px;white-space:nowrap}
+.tfoot-row td{background:var(--blue)!important;color:#fff;font-weight:800;font-size:12px}
+
+/* ── BADGES ── */
+.badge{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3px}
+.b-adv{background:#dbeafe;color:#1a3c6e}
+.b-comp{background:#ccfbf1;color:#0e7490}
+.b-dev{background:#fef3c7;color:#92400e}
+.b-req{background:#fee2e2;color:#dc2626}
+
+/* ── PLO MINI BARS ── */
+.mini-bar-wrap{display:flex;gap:2px;height:14px;align-items:flex-end;min-width:80px}
+.mini-bar{width:9px;border-radius:1px 1px 0 0}
+
+/* ── DOWNLOAD PANEL ── */
+.dl-panel{background:#fff;border-radius:10px;border:1px solid var(--border);padding:18px;box-shadow:0 1px 5px rgba(0,0,0,.05);margin-bottom:20px}
+.dl-panel h3{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px;border-left:4px solid var(--gold);padding-left:8px}
+.dl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.dl-item{border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.dl-item h4{font-size:12px;font-weight:700;color:var(--blue)}
+.dl-item p{font-size:11px;color:var(--muted);line-height:1.5}
+.dl-item .dl-btns{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ── PRINT STYLES ── */
+@media print{
+  .no-print{display:none!important}
+  body{background:#fff;font-size:10pt}
+  .app-hdr{background:#1a3c6e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .stat-card,.chart-box,.tbl-wrap,.dl-panel{box-shadow:none!important}
+  .main{padding:10px}
+  .print-page-break{page-break-before:always}
+}
+
+/* ── REPORT PAGE (for print window) ── */
+.rpt-header{display:flex;align-items:flex-start;gap:14px;border-bottom:3px solid #1a3c6e;padding-bottom:10px;margin-bottom:14px}
+.rpt-logo{width:64px;height:64px;border:2px solid #1a3c6e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#1a3c6e;background:#f0f6ff;flex-shrink:0}
+.rpt-title h2{font-size:13pt;font-weight:900;color:#1a3c6e;text-transform:uppercase}
+.rpt-title h3{font-size:10pt;font-weight:700;color:#0e7490;margin-top:2px}
+.rpt-title p{font-size:8pt;color:#64748b;margin-top:2px}
+.rpt-meta{margin-left:auto;text-align:right;font-size:8pt;color:#64748b}
+.rpt-meta strong{display:block;font-size:10pt;color:#1a3c6e;font-weight:800}
+</style>
+</head>
+<body>
+
+<!-- SCREEN HEADER -->
+<div class="app-hdr no-print">
+  <div class="logo">RPT</div>
+  <div>
+    <h1>TVET Competency Performance Report — Total Student Analysis</h1>
+    <p>40 Students | Semester 1–6 | POLYCC Grading 2025 | JPPKK Malaysia | Download by Performance Group</p>
+  </div>
+  <a href="tvet_cba_dashboard.html" class="back-btn">↩ Dashboard</a>
+</div>
+
+<!-- CONTROLS -->
+<div class="ctrl no-print">
+  <label>Filter Group:</label>
+  <select id="group-filter" onchange="applyFilter()">
+    <option value="all">All Students (40)</option>
+    <option value="Advanced">Advanced Only</option>
+    <option value="Competent">Competent Only</option>
+    <option value="Developing">Developing Only</option>
+    <option value="Requires Improvement">Requires Improvement Only</option>
+    <option value="pass">Pass (Advanced + Competent)</option>
+    <option value="fail">Fail (Developing + Req. Improvement)</option>
+  </select>
+  <label>Sort By:</label>
+  <select id="sort-by" onchange="applyFilter()">
+    <option value="rank">Rank (CGPA ↓)</option>
+    <option value="id">Student ID</option>
+    <option value="comp">Competency % ↓</option>
+    <option value="name">Name A–Z</option>
+  </select>
+  <button class="btn btn-blue no-print" onclick="applyFilter()">🔄 Refresh</button>
+  <button class="btn btn-teal no-print" onclick="downloadCSV()">⬇ Download CSV</button>
+  <button class="btn btn-gold no-print" onclick="printReport()">🖨 Print / PDF Report</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="main-content">
+
+  <!-- STAT CARDS -->
+  <div class="sec">Performance Overview — All 40 Students</div>
+  <div class="stat-row" id="stat-row">
+    <div class="stat-card active" style="--accent:#1a3c6e" onclick="setGroup('all')">
+      <div class="stat-lbl" style="color:#1a3c6e">Total Students</div>
+      <div class="stat-num" style="color:#1a3c6e" id="s-total">40</div>
+      <div class="stat-sub">Full Cohort</div>
+      <div class="stat-pct" style="color:#1a3c6e">100%</div>
+    </div>
+    <div class="stat-card" style="--accent:#1a3c6e" onclick="setGroup('Advanced')">
+      <div class="stat-lbl" style="color:#1a3c6e">🏆 Advanced</div>
+      <div class="stat-num" style="color:#1a3c6e" id="s-adv">–</div>
+      <div class="stat-sub">Comp ≥ 85%</div>
+      <div class="stat-pct" id="s-adv-pct" style="color:#1a3c6e">–</div>
+    </div>
+    <div class="stat-card" style="--accent:#0e7490" onclick="setGroup('Competent')">
+      <div class="stat-lbl" style="color:#0e7490">✅ Competent</div>
+      <div class="stat-num" style="color:#0e7490" id="s-comp">–</div>
+      <div class="stat-sub">Comp 70–84%</div>
+      <div class="stat-pct" id="s-comp-pct" style="color:#0e7490">–</div>
+    </div>
+    <div class="stat-card" style="--accent:#d97706" onclick="setGroup('Developing')">
+      <div class="stat-lbl" style="color:#d97706">⚡ Developing</div>
+      <div class="stat-num" style="color:#d97706" id="s-dev">–</div>
+      <div class="stat-sub">Comp 50–69%</div>
+      <div class="stat-pct" id="s-dev-pct" style="color:#d97706">–</div>
+    </div>
+    <div class="stat-card" style="--accent:#dc2626" onclick="setGroup('Requires Improvement')">
+      <div class="stat-lbl" style="color:#dc2626">❌ Req. Improvement</div>
+      <div class="stat-num" style="color:#dc2626" id="s-req">–</div>
+      <div class="stat-sub">Comp &lt; 50%</div>
+      <div class="stat-pct" id="s-req-pct" style="color:#dc2626">–</div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="sec no-print">Visual Performance Analytics</div>
+  <div class="chart-row no-print">
+    <div class="chart-box">
+      <h3>Competency Group Distribution</h3>
+      <canvas id="ch-donut" height="200"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>CGPA Distribution by Group</h3>
+      <canvas id="ch-cgpa" height="200"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Average PLO Attainment by Group</h3>
+      <canvas id="ch-plo" height="200"></canvas>
+    </div>
+    <div class="chart-box" style="grid-column:span 2">
+      <h3>Semester GPA Trend — Group Averages</h3>
+      <canvas id="ch-gpa-trend" height="100"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>NOSS Competency by Group</h3>
+      <canvas id="ch-noss" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- REPORT TABLE -->
+  <div class="sec">Student Performance Table — <span id="tbl-group-label">All 40 Students</span></div>
+  <div class="tbl-wrap">
+    <div class="tbl-hdr">
+      <h3 id="tbl-title">Complete Student Performance Report</h3>
+      <span id="tbl-count">40 students shown</span>
+    </div>
+    <div style="overflow-x:auto">
+    <table id="report-table">
+      <thead>
+        <tr>
+          <th>Rank</th><th>Student ID</th><th>Name</th><th>Programme</th>
+          <th>S1 GPA</th><th>S2 GPA</th><th>S3 GPA</th>
+          <th>S4 GPA</th><th>S5 GPA</th><th>S6 GPA</th>
+          <th>CGPA</th><th>Avg Mark</th>
+          <th>Comp %</th><th>Status</th>
+          <th>PLO Avg</th><th>NOSS Avg</th>
+          <th>Honours Class</th>
+        </tr>
+      </thead>
+      <tbody id="report-tbody"></tbody>
+      <tfoot id="report-tfoot"></tfoot>
+    </table>
+    </div>
+  </div>
+
+  <!-- PLO DETAIL TABLE -->
+  <div class="sec">PLO Attainment Detail — <span id="plo-group-label">All Students</span></div>
+  <div class="tbl-wrap">
+    <div class="tbl-hdr">
+      <h3>Programme Learning Outcome Attainment per Student</h3>
+      <span id="plo-count">40 students</span>
+    </div>
+    <div style="overflow-x:auto">
+    <table id="plo-table">
+      <thead>
+        <tr>
+          <th>Rank</th><th>ID</th><th>Name</th>
+          <th>PLO1 Knowledge</th><th>PLO2 Cognitive</th><th>PLO3 Practical</th><th>PLO4 Interpersonal</th>
+          <th>PLO5 Communication</th><th>PLO6 Digital</th><th>PLO7 Leadership</th><th>PLO8 Entrepreneurial</th>
+          <th>PLO Avg</th>
+        </tr>
+      </thead>
+      <tbody id="plo-tbody"></tbody>
+      <tfoot id="plo-tfoot"></tfoot>
+    </table>
+    </div>
+  </div>
+
+  <!-- NOSS DETAIL TABLE -->
+  <div class="sec">NOSS Competency Unit Detail — <span id="noss-group-label">All Students</span></div>
+  <div class="tbl-wrap">
+    <div class="tbl-hdr">
+      <h3>NOSS Unit Competency Scores per Student</h3>
+      <span id="noss-count">40 students</span>
+    </div>
+    <div style="overflow-x:auto">
+    <table id="noss-table">
+      <thead>
+        <tr>
+          <th>Rank</th><th>ID</th><th>Name</th>
+          <th>Electrical Inst.</th><th>Control Sys.</th><th>Power Sys.</th>
+          <th>Instrumentation</th><th>Automation</th><th>Tech Reporting</th>
+          <th>NOSS Avg</th><th>Units Competent</th>
+        </tr>
+      </thead>
+      <tbody id="noss-tbody"></tbody>
+      <tfoot id="noss-tfoot"></tfoot>
+    </table>
+    </div>
+  </div>
+
+  <!-- DOWNLOAD PANEL -->
+  <div class="dl-panel no-print">
+    <h3>📥 Download Reports by Performance Group</h3>
+    <div class="dl-grid">
+      <div class="dl-item">
+        <h4 style="color:#1a3c6e">📋 All Students (40)</h4>
+        <p>Complete academic, competency, PLO and NOSS data for all 40 students.</p>
+        <div class="dl-btns">
+          <button class="btn btn-blue" onclick="downloadCSV('all','academic')">⬇ Academic CSV</button>
+          <button class="btn btn-teal" onclick="downloadCSV('all','plo')">⬇ PLO CSV</button>
+          <button class="btn btn-gold" onclick="downloadCSV('all','noss')">⬇ NOSS CSV</button>
+        </div>
+      </div>
+      <div class="dl-item">
+        <h4 style="color:#1a3c6e">🏆 Advanced Students</h4>
+        <p>Report for students with competency score ≥ 85%.</p>
+        <div class="dl-btns">
+          <button class="btn btn-blue" onclick="downloadCSV('Advanced','academic')">⬇ Academic CSV</button>
+          <button class="btn btn-teal" onclick="downloadCSV('Advanced','plo')">⬇ PLO CSV</button>
+        </div>
+      </div>
+      <div class="dl-item">
+        <h4 style="color:#0e7490">✅ Competent Students</h4>
+        <p>Report for students with competency score 70–84%.</p>
+        <div class="dl-btns">
+          <button class="btn btn-teal" onclick="downloadCSV('Competent','academic')">⬇ Academic CSV</button>
+          <button class="btn btn-teal" onclick="downloadCSV('Competent','plo')">⬇ PLO CSV</button>
+        </div>
+      </div>
+      <div class="dl-item">
+        <h4 style="color:#d97706">⚡ Developing Students</h4>
+        <p>Report for students with competency score 50–69%.</p>
+        <div class="dl-btns">
+          <button class="btn btn-gold" onclick="downloadCSV('Developing','academic')">⬇ Academic CSV</button>
+          <button class="btn btn-gold" onclick="downloadCSV('Developing','noss')">⬇ NOSS CSV</button>
+        </div>
+      </div>
+      <div class="dl-item">
+        <h4 style="color:#dc2626">❌ Requires Improvement</h4>
+        <p>Report for students needing urgent intervention (comp &lt; 50%).</p>
+        <div class="dl-btns">
+          <button class="btn btn-red" onclick="downloadCSV('Requires Improvement','academic')">⬇ Academic CSV</button>
+          <button class="btn btn-red" onclick="downloadCSV('Requires Improvement','plo')">⬇ PLO CSV</button>
+        </div>
+      </div>
+      <div class="dl-item">
+        <h4 style="color:#1a3c6e">📊 Pass Group (Adv + Comp)</h4>
+        <p>Combined report for all students meeting competency standard.</p>
+        <div class="dl-btns">
+          <button class="btn btn-blue" onclick="downloadCSV('pass','academic')">⬇ Academic CSV</button>
+          <button class="btn btn-teal" onclick="downloadCSV('pass','full')">⬇ Full CSV</button>
+        </div>
+      </div>
+      <div class="dl-item">
+        <h4 style="color:#dc2626">⚠ Fail Group (Dev + Req)</h4>
+        <p>Combined intervention report for below-standard students.</p>
+        <div class="dl-btns">
+          <button class="btn btn-red" onclick="downloadCSV('fail','academic')">⬇ Academic CSV</button>
+          <button class="btn btn-gold" onclick="downloadCSV('fail','full')">⬇ Full CSV</button>
+        </div>
+      </div>
+      <div class="dl-item">
+        <h4 style="color:#1a3c6e">🖨 Print / Save Full PDF</h4>
+        <p>Open full print-ready report for the currently selected group.</p>
+        <div class="dl-btns">
+          <button class="btn btn-blue" onclick="printReport()">🖨 Print PDF</button>
+          <button class="btn btn-gold" onclick="downloadCSV('all','full')">⬇ Full CSV (All)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .main -->
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// DATA ENGINE — identical seed/logic to all other files
+// ════════════════════════════════════════════════════════════════
+const NAMES=[
+  "Ahmad Hafizuddin bin Razali","Nurul Ain binti Mohd Zaki","Muhammad Irfan bin Ismail",
+  "Siti Nabilah binti Kamaruddin","Mohd Azizi bin Abdullah","Farah Diyana binti Hamid",
+  "Hafiz Iqbal bin Sulaiman","Amirah Husna binti Othman","Zulaikha binti Mohd Noor",
+  "Muhammad Faris bin Yusof","Nur Aisyah binti Ramli","Danial Haziq bin Baharum",
+  "Shafiqah binti Idris","Adam Luqman bin Zainal","Liyana Izzati binti Azman",
+  "Muhammad Amirul bin Ghazali","Noor Hafizah binti Daud","Syahmi Hakimi bin Kadir",
+  "Izzatul Mardiah binti Nasir","Amirulhakim bin Zulkifli","Noor Fatimah binti Omar",
+  "Muhamad Ridhwan bin Hassan","Dalilah Syafiqah binti Rohim","Hazwan Haziq bin Kassim",
+  "Nurulhuda binti Nordin","Syafiq Adli bin Mazlan","Nur Hidayah binti Rosli",
+  "Luqmanul Hakim bin Aziz","Fatin Nadhirah binti Samsudin","Eizwan Fadzli bin Mansor",
+  "Nur Syazwani binti Mustafa","Imran Haiqal bin Jaafar","Rabiatul Adawiyah binti Sabri",
+  "Haziq Amsyar bin Zahari","Nabilah Sofea binti Rahim","Muhammad Syauqi bin Tahir",
+  "Ainul Mardhiah binti Halim","Ikhwan Syafri bin Musa","Nurul Nabilah binti Hamzah",
+  "Khairul Hafiz bin Salleh"
+];
+const PROGRAMMES=[
+  "Dip. Electrical Eng.","Dip. Electrical Eng.","Dip. Electronics Eng.",
+  "Dip. Electronics Eng.","Dip. Electrical Eng.","Dip. Mechatronics",
+  "Dip. Electrical Eng.","Dip. Electronics Eng.","Dip. Mechatronics",
+  "Dip. Electrical Eng.","Dip. Electronics Eng.","Dip. Electrical Eng.",
+  "Dip. Mechatronics","Dip. Electronics Eng.","Dip. Electrical Eng.",
+  "Dip. Electrical Eng.","Dip. Mechatronics","Dip. Electronics Eng.",
+  "Dip. Electrical Eng.","Dip. Mechatronics","Dip. Electronics Eng.",
+  "Dip. Electrical Eng.","Dip. Mechatronics","Dip. Electrical Eng.",
+  "Dip. Electronics Eng.","Dip. Electrical Eng.","Dip. Mechatronics",
+  "Dip. Electronics Eng.","Dip. Electrical Eng.","Dip. Mechatronics",
+  "Dip. Electronics Eng.","Dip. Electrical Eng.","Dip. Mechatronics",
+  "Dip. Electrical Eng.","Dip. Electronics Eng.","Dip. Electrical Eng.",
+  "Dip. Mechatronics","Dip. Electrical Eng.","Dip. Electronics Eng.",
+  "Dip. Electrical Eng."
+];
+const CREDITS=[3,3,2,4,3,2];
+const GRADING=[
+  {min:90,max:100,grade:"A+",gp:4.00},{min:80,max:89,grade:"A",gp:4.00},
+  {min:75,max:79,grade:"A-",gp:3.67},{min:70,max:74,grade:"B+",gp:3.33},
+  {min:65,max:69,grade:"B",gp:3.00},{min:60,max:64,grade:"B-",gp:2.67},
+  {min:55,max:59,grade:"C+",gp:2.33},{min:50,max:54,grade:"C",gp:2.00},
+  {min:47,max:49,grade:"C-",gp:1.67},{min:44,max:46,grade:"D+",gp:1.33},
+  {min:40,max:43,grade:"D",gp:1.00},{min:30,max:39,grade:"E",gp:0.67},
+  {min:20,max:29,grade:"E-",gp:0.33},{min:0,max:19,grade:"F",gp:0.00}
+];
+const PLO_LABELS=["PLO1 Knowledge","PLO2 Cognitive","PLO3 Practical","PLO4 Interpersonal","PLO5 Communication","PLO6 Digital","PLO7 Leadership","PLO8 Entrepreneurial"];
+const NOSS_LABELS=["Electrical Inst.","Control Sys.","Power Sys.","Instrumentation","Automation","Tech Reporting"];
+
+function getGrade(m){for(const g of GRADING)if(m>=g.min&&m<=g.max)return g;return GRADING[GRADING.length-1];}
+function seededRand(seed){let s=seed;return function(){s=(s*16807+0)%2147483647;return(s-1)/2147483646;};}
+function genMark(rand,ability,semBonus){return Math.min(100,Math.max(0,Math.round(40+ability*50+semBonus+(rand()-0.5)*22)));}
+function honClass(cgpa){
+  if(cgpa>=3.70)return"First Class Honours";
+  if(cgpa>=3.30)return"Second Class Upper";
+  if(cgpa>=3.00)return"Second Class Lower";
+  if(cgpa>=2.50)return"Third Class";
+  if(cgpa>=2.00)return"Pass";
+  return"Fail";
+}
+function ploColor(v){return v>=85?'#1a3c6e':v>=70?'#0e7490':v>=50?'#d97706':'#dc2626';}
+function statusColor(s){return s==='Advanced'?'#1a3c6e':s==='Competent'?'#0e7490':s==='Developing'?'#d97706':'#dc2626';}
+function statusBg(s){return s==='Advanced'?'#dbeafe':s==='Competent'?'#ccfbf1':s==='Developing'?'#fef3c7':'#fee2e2';}
+function statusClass(s){return s==='Advanced'?'b-adv':s==='Competent'?'b-comp':s==='Developing'?'b-dev':'b-req';}
+
+// Build all 40 students
+const ALL=[];
+for(let i=0;i<40;i++){
+  const id="TVET"+(String(i+1).padStart(3,"0"));
+  const rand=seededRand(i*7+13);
+  const ability=0.3+rand()*0.65;
+  const semestres=[];
+  let totalQP=0,totalCred=0;
+  for(let s=0;s<6;s++){
+    const semBonus=s*1.5, courses=[];
+    let semQP=0,semCred=0;
+    for(let c=0;c<6;c++){
+      const mark=genMark(rand,ability,semBonus);
+      const gr=getGrade(mark);
+      const cr=CREDITS[c];
+      courses.push({mark,grade:gr.grade,gp:gr.gp,credit:cr});
+      semQP+=gr.gp*cr; semCred+=cr;
+    }
+    const semGPA=Math.round((semQP/semCred)*100)/100;
+    totalQP+=semQP; totalCred+=semCred;
+    semestres.push({sem:s+1,gpa:semGPA,credits:semCred,totalQP:semQP,courses});
+  }
+  const cgpa=Math.round((totalQP/totalCred)*100)/100;
+  const allMarks=semestres.flatMap(s=>s.courses.map(c=>c.mark));
+  const avgMark=Math.round(allMarks.reduce((a,b)=>a+b,0)/allMarks.length*10)/10;
+  const compPct=Math.min(100,Math.round(avgMark*0.95+rand()*6));
+  const plo=[
+    avgMark*0.92+rand()*8,avgMark*0.88+rand()*10,avgMark*0.90+rand()*9,
+    avgMark*0.85+rand()*12,avgMark*0.87+rand()*11,avgMark*0.89+rand()*9,
+    avgMark*0.83+rand()*13,avgMark*0.86+rand()*10
+  ].map(v=>Math.min(100,Math.max(0,Math.round(v))));
+  const noss=[
+    Math.round(avgMark*0.93+rand()*8),Math.round(avgMark*0.91+rand()*9),
+    Math.round(avgMark*0.94+rand()*7),Math.round(avgMark*0.90+rand()*10),
+    Math.round(avgMark*0.88+rand()*11),Math.round(avgMark*0.92+rand()*8)
+  ].map(v=>Math.min(100,Math.max(0,v)));
+  const ploAvg=Math.round(plo.reduce((a,b)=>a+b,0)/8);
+  const nossAvg=Math.round(noss.reduce((a,b)=>a+b,0)/6);
+  const nossComp=noss.filter(v=>v>=70).length;
+  let compStatus;
+  if(compPct>=85)compStatus="Advanced";
+  else if(compPct>=70)compStatus="Competent";
+  else if(compPct>=50)compStatus="Developing";
+  else compStatus="Requires Improvement";
+  ALL.push({id,name:NAMES[i],programme:PROGRAMMES[i],semestres,cgpa,avgMark,compPct,compStatus,plo,ploAvg,noss,nossAvg,nossComp,totalCredits:totalCred});
+}
+
+// Assign ranks by CGPA
+[...ALL].sort((a,b)=>b.cgpa-a.cgpa).forEach((s,i)=>s.rank=i+1);
+
+// Cohort stats
+const cohortStats={
+  all:ALL,
+  Advanced:ALL.filter(s=>s.compStatus==='Advanced'),
+  Competent:ALL.filter(s=>s.compStatus==='Competent'),
+  Developing:ALL.filter(s=>s.compStatus==='Developing'),
+  'Requires Improvement':ALL.filter(s=>s.compStatus==='Requires Improvement'),
+  pass:ALL.filter(s=>s.compStatus==='Advanced'||s.compStatus==='Competent'),
+  fail:ALL.filter(s=>s.compStatus==='Developing'||s.compStatus==='Requires Improvement')
+};
+
+function groupAvg(arr,key){return arr.length?Math.round(arr.reduce((a,b)=>a+b[key],0)/arr.length*100)/100:0;}
+function groupAvgPLO(arr,idx){return arr.length?Math.round(arr.reduce((a,b)=>a+b.plo[idx],0)/arr.length):0;}
+function groupAvgNOSS(arr,idx){return arr.length?Math.round(arr.reduce((a,b)=>a+b.noss[idx],0)/arr.length):0;}
+function groupAvgSemGPA(arr,semIdx){return arr.length?(arr.reduce((a,b)=>a+b.semestres[semIdx].gpa,0)/arr.length).toFixed(2):0;}
+
+// ════════════════════════════════════════════════════════════════
+// RENDER SUMMARY STAT CARDS
+// ════════════════════════════════════════════════════════════════
+function renderStats(){
+  const n=ALL.length;
+  const adv=cohortStats.Advanced.length, comp=cohortStats.Competent.length;
+  const dev=cohortStats.Developing.length, req=cohortStats['Requires Improvement'].length;
+  document.getElementById('s-total').textContent=n;
+  document.getElementById('s-adv').textContent=adv;
+  document.getElementById('s-adv-pct').textContent=(adv/n*100).toFixed(1)+'%';
+  document.getElementById('s-comp').textContent=comp;
+  document.getElementById('s-comp-pct').textContent=(comp/n*100).toFixed(1)+'%';
+  document.getElementById('s-dev').textContent=dev;
+  document.getElementById('s-dev-pct').textContent=(dev/n*100).toFixed(1)+'%';
+  document.getElementById('s-req').textContent=req;
+  document.getElementById('s-req-pct').textContent=(req/n*100).toFixed(1)+'%';
+}
+
+// ════════════════════════════════════════════════════════════════
+// RENDER CHARTS
+// ════════════════════════════════════════════════════════════════
+let charts={};
+function mkChart(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),cfg);}
+
+function renderCharts(){
+  const adv=cohortStats.Advanced.length, comp=cohortStats.Competent.length;
+  const dev=cohortStats.Developing.length, req=cohortStats['Requires Improvement'].length;
+
+  // Donut
+  mkChart('ch-donut',{type:'doughnut',data:{
+    labels:['Advanced','Competent','Developing','Req. Improvement'],
+    datasets:[{data:[adv,comp,dev,req],backgroundColor:['#1a3c6e','#0e7490','#d97706','#dc2626'],borderWidth:3,borderColor:'#fff'}]
+  },options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:10}}}}});
+
+  // CGPA scatter/bar grouped
+  const groups=['Advanced','Competent','Developing','Req. Improvement'];
+  const groupKeys=['Advanced','Competent','Developing','Requires Improvement'];
+  const colors=['#1a3c6e','#0e7490','#d97706','#dc2626'];
+  mkChart('ch-cgpa',{type:'bar',data:{
+    labels:groups,
+    datasets:[
+      {label:'Min',data:groupKeys.map(k=>cohortStats[k].length?Math.min(...cohortStats[k].map(s=>s.cgpa)):0),backgroundColor:colors.map(c=>c+'55'),borderRadius:3},
+      {label:'Avg',data:groupKeys.map(k=>groupAvg(cohortStats[k]||[],'cgpa')),backgroundColor:colors,borderRadius:3},
+      {label:'Max',data:groupKeys.map(k=>cohortStats[k].length?Math.max(...cohortStats[k].map(s=>s.cgpa)):0),backgroundColor:colors.map(c=>c+'99'),borderRadius:3}
+    ]
+  },options:{responsive:true,plugins:{legend:{position:'top',labels:{font:{size:9}}}},scales:{y:{min:0,max:4.1,ticks:{stepSize:.5}}}}});
+
+  // PLO radar
+  const passAvgPLO=PLO_LABELS.map((_,i)=>groupAvgPLO(cohortStats.pass,i));
+  const failAvgPLO=PLO_LABELS.map((_,i)=>groupAvgPLO(cohortStats.fail,i));
+  const allAvgPLO=PLO_LABELS.map((_,i)=>groupAvgPLO(ALL,i));
+  mkChart('ch-plo',{type:'radar',data:{
+    labels:['Know.','Cogn.','Pract.','Interp.','Comm.','Digital','Lead.','Entrep.'],
+    datasets:[
+      {label:'Pass',data:passAvgPLO,borderColor:'#1a3c6e',backgroundColor:'rgba(26,60,110,.12)',pointRadius:3},
+      {label:'Fail',data:failAvgPLO,borderColor:'#dc2626',backgroundColor:'rgba(220,38,38,.1)',pointRadius:3},
+      {label:'All',data:allAvgPLO,borderColor:'#c9991a',backgroundColor:'rgba(201,153,26,.08)',borderDash:[3,2],pointRadius:2}
+    ]
+  },options:{responsive:true,scales:{r:{beginAtZero:true,max:100,ticks:{stepSize:20,font:{size:8}}}},plugins:{legend:{position:'top',labels:{font:{size:10}}}}}});
+
+  // GPA trend lines
+  mkChart('ch-gpa-trend',{type:'line',data:{
+    labels:['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5','Sem 6'],
+    datasets:[
+      {label:'All Students',data:[0,1,2,3,4,5].map(i=>groupAvgSemGPA(ALL,i)),borderColor:'#2563a8',tension:.4,fill:false,pointRadius:4},
+      {label:'Advanced',data:[0,1,2,3,4,5].map(i=>groupAvgSemGPA(cohortStats.Advanced,i)),borderColor:'#1a3c6e',tension:.4,fill:false,pointRadius:3,borderDash:[5,3]},
+      {label:'Competent',data:[0,1,2,3,4,5].map(i=>groupAvgSemGPA(cohortStats.Competent,i)),borderColor:'#0e7490',tension:.4,fill:false,pointRadius:3,borderDash:[3,2]},
+      {label:'Developing',data:[0,1,2,3,4,5].map(i=>groupAvgSemGPA(cohortStats.Developing,i)),borderColor:'#d97706',tension:.4,fill:false,pointRadius:3,borderDash:[4,3]},
+      {label:'Req.Improvement',data:[0,1,2,3,4,5].map(i=>groupAvgSemGPA(cohortStats['Requires Improvement'],i)),borderColor:'#dc2626',tension:.4,fill:false,pointRadius:3,borderDash:[2,3]}
+    ]
+  },options:{responsive:true,plugins:{legend:{position:'top',labels:{font:{size:10}}}},scales:{y:{min:1.5,max:4.1,ticks:{stepSize:.25},title:{display:true,text:'GPA'}}}}});
+
+  // NOSS group avg
+  mkChart('ch-noss',{type:'bar',data:{
+    labels:NOSS_LABELS,
+    datasets:[
+      {label:'Pass',data:NOSS_LABELS.map((_,i)=>groupAvgNOSS(cohortStats.pass,i)),backgroundColor:'#1a3c6e',borderRadius:4},
+      {label:'Fail',data:NOSS_LABELS.map((_,i)=>groupAvgNOSS(cohortStats.fail,i)),backgroundColor:'#dc2626',borderRadius:4},
+      {label:'Threshold (70%)',data:Array(6).fill(70),type:'line',borderColor:'#c9991a',borderDash:[4,3],borderWidth:2,pointRadius:0,fill:false}
+    ]
+  },options:{responsive:true,plugins:{legend:{position:'top',labels:{font:{size:10}}}},scales:{y:{min:0,max:100}}}});
+}
+
+// ════════════════════════════════════════════════════════════════
+// FILTER & RENDER TABLES
+// ════════════════════════════════════════════════════════════════
+let currentGroup='all';
+let currentSort='rank';
+
+function getFilteredStudents(){
+  let arr;
+  const gf=document.getElementById('group-filter')?document.getElementById('group-filter').value:'all';
+  if(gf==='all')arr=[...ALL];
+  else if(gf==='pass')arr=[...cohortStats.pass];
+  else if(gf==='fail')arr=[...cohortStats.fail];
+  else arr=ALL.filter(s=>s.compStatus===gf);
+  const sf=document.getElementById('sort-by')?document.getElementById('sort-by').value:'rank';
+  if(sf==='rank')arr.sort((a,b)=>a.rank-b.rank);
+  else if(sf==='comp')arr.sort((a,b)=>b.compPct-a.compPct);
+  else if(sf==='name')arr.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sf==='id')arr.sort((a,b)=>a.id.localeCompare(b.id));
+  return arr;
+}
+
+function groupLabel(gf){
+  if(gf==='all')return'All 40 Students';
+  if(gf==='pass')return'Pass Group (Advanced + Competent)';
+  if(gf==='fail')return'Fail Group (Developing + Req. Improvement)';
+  return gf+' Students';
+}
+
+function renderMainTable(students){
+  const tbody=document.getElementById('report-tbody');
+  tbody.innerHTML=students.map(s=>{
+    const semGPAs=s.semestres.map(x=>x.gpa.toFixed(2)).join('</td><td>');
+    const cgpaColor=s.cgpa>=3.5?'#1a3c6e':s.cgpa>=3?'#0e7490':s.cgpa>=2.5?'#d97706':'#dc2626';
+    return`<tr>
+      <td><strong>#${s.rank}</strong></td>
+      <td><strong style="color:#1a3c6e">${s.id}</strong></td>
+      <td>${s.name}</td>
+      <td style="font-size:10.5px">${s.programme}</td>
+      <td>${semGPAs}</td>
+      <td><strong style="color:${cgpaColor}">${s.cgpa.toFixed(2)}</strong></td>
+      <td>${s.avgMark.toFixed(1)}</td>
+      <td><strong style="color:${statusColor(s.compStatus)}">${s.compPct}%</strong></td>
+      <td><span class="badge ${statusClass(s.compStatus)}">${s.compStatus}</span></td>
+      <td><strong style="color:${ploColor(s.ploAvg)}">${s.ploAvg}%</strong></td>
+      <td><strong style="color:${ploColor(s.nossAvg)}">${s.nossAvg}%</strong></td>
+      <td style="font-size:10.5px">${honClass(s.cgpa)}</td>
+    </tr>`;
+  }).join('');
+
+  // Footer totals
+  const avg=v=>students.length?(students.reduce((a,b)=>a+b[v],0)/students.length):0;
+  const avgSem=i=>students.length?(students.reduce((a,b)=>a+b.semestres[i].gpa,0)/students.length).toFixed(2):'-';
+  document.getElementById('report-tfoot').innerHTML=`<tr class="tfoot-row">
+    <td colspan="4">AVERAGE (${students.length} students)</td>
+    <td>${avgSem(0)}</td><td>${avgSem(1)}</td><td>${avgSem(2)}</td>
+    <td>${avgSem(3)}</td><td>${avgSem(4)}</td><td>${avgSem(5)}</td>
+    <td>${avg('cgpa').toFixed(2)}</td>
+    <td>${avg('avgMark').toFixed(1)}</td>
+    <td>${Math.round(avg('compPct'))}%</td>
+    <td>—</td>
+    <td>${Math.round(avg('ploAvg'))}%</td>
+    <td>${Math.round(avg('nossAvg'))}%</td>
+    <td>—</td>
+  </tr>`;
+}
+
+function renderPLOTable(students){
+  document.getElementById('plo-tbody').innerHTML=students.map(s=>{
+    const ploCells=s.plo.map(v=>`<td style="text-align:center;color:${ploColor(v)};font-weight:600">${v}%</td>`).join('');
+    return`<tr>
+      <td><strong>#${s.rank}</strong></td>
+      <td><strong style="color:#1a3c6e">${s.id}</strong></td>
+      <td>${s.name}</td>
+      ${ploCells}
+      <td style="text-align:center;font-weight:800;color:${ploColor(s.ploAvg)}">${s.ploAvg}%</td>
+    </tr>`;
+  }).join('');
+  const avgPLO=PLO_LABELS.map((_,i)=>Math.round(students.reduce((a,b)=>a+b.plo[i],0)/Math.max(1,students.length)));
+  const avgOvr=Math.round(avgPLO.reduce((a,b)=>a+b,0)/8);
+  document.getElementById('plo-tfoot').innerHTML=`<tr class="tfoot-row">
+    <td colspan="3">COHORT AVERAGE (${students.length} students)</td>
+    ${avgPLO.map(v=>`<td style="text-align:center">${v}%</td>`).join('')}
+    <td style="text-align:center">${avgOvr}%</td>
+  </tr>`;
+}
+
+function renderNOSSTable(students){
+  document.getElementById('noss-tbody').innerHTML=students.map(s=>{
+    const nossCells=s.noss.map(v=>{
+      const c=v>=70?'#0e7490':'#dc2626';
+      return`<td style="text-align:center;color:${c};font-weight:600">${v}% <span style="font-size:9px">${v>=70?'✓':'✗'}</span></td>`;
+    }).join('');
+    return`<tr>
+      <td><strong>#${s.rank}</strong></td>
+      <td><strong style="color:#1a3c6e">${s.id}</strong></td>
+      <td>${s.name}</td>
+      ${nossCells}
+      <td style="text-align:center;font-weight:800;color:${ploColor(s.nossAvg)}">${s.nossAvg}%</td>
+      <td style="text-align:center;font-weight:700">${s.nossComp}/6</td>
+    </tr>`;
+  }).join('');
+  const avgNOSS=NOSS_LABELS.map((_,i)=>Math.round(students.reduce((a,b)=>a+b.noss[i],0)/Math.max(1,students.length)));
+  const avgOvr=Math.round(avgNOSS.reduce((a,b)=>a+b,0)/6);
+  const avgComp=Math.round(students.reduce((a,b)=>a+b.nossComp,0)/Math.max(1,students.length)*10)/10;
+  document.getElementById('noss-tfoot').innerHTML=`<tr class="tfoot-row">
+    <td colspan="3">COHORT AVERAGE (${students.length} students)</td>
+    ${avgNOSS.map(v=>`<td style="text-align:center">${v}%</td>`).join('')}
+    <td style="text-align:center">${avgOvr}%</td>
+    <td style="text-align:center">${avgComp}/6</td>
+  </tr>`;
+}
+
+function applyFilter(){
+  const students=getFilteredStudents();
+  const gf=document.getElementById('group-filter').value;
+  const lbl=groupLabel(gf);
+  document.getElementById('tbl-group-label').textContent=lbl;
+  document.getElementById('plo-group-label').textContent=lbl;
+  document.getElementById('noss-group-label').textContent=lbl;
+  document.getElementById('tbl-title').textContent=`Performance Report — ${lbl}`;
+  document.getElementById('tbl-count').textContent=`${students.length} student${students.length!==1?'s':''} shown`;
+  document.getElementById('plo-count').textContent=`${students.length} students`;
+  document.getElementById('noss-count').textContent=`${students.length} students`;
+  renderMainTable(students);
+  renderPLOTable(students);
+  renderNOSSTable(students);
+  // Highlight active stat card
+  document.querySelectorAll('.stat-card').forEach(c=>c.classList.remove('active'));
+  const map={'all':0,'Advanced':1,'Competent':2,'Developing':3,'Requires Improvement':4};
+  if(map[gf]!==undefined) document.querySelectorAll('.stat-card')[map[gf]].classList.add('active');
+}
+
+function setGroup(grp){
+  document.getElementById('group-filter').value=grp;
+  applyFilter();
+}
+
+// ════════════════════════════════════════════════════════════════
+// CSV DOWNLOAD
+// ════════════════════════════════════════════════════════════════
+function getGroupStudents(grp){
+  if(!grp||grp==='all')return ALL;
+  if(grp==='pass')return cohortStats.pass;
+  if(grp==='fail')return cohortStats.fail;
+  return ALL.filter(s=>s.compStatus===grp);
+}
+
+function downloadCSV(grp,type){
+  grp=grp||document.getElementById('group-filter').value;
+  type=type||'academic';
+  const students=[...getGroupStudents(grp)].sort((a,b)=>a.rank-b.rank);
+  const lbl=groupLabel(grp).replace(/ /g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  let rows=[], filename='';
+
+  if(type==='academic'||type==='full'){
+    filename=`TVET_Academic_Report_${lbl}_${new Date().toISOString().slice(0,10)}.csv`;
+    rows.push(['Rank','Student ID','Name','Programme',
+      'S1 GPA','S2 GPA','S3 GPA','S4 GPA','S5 GPA','S6 GPA',
+      'Final CGPA','Avg Mark (%)','Competency (%)','Status',
+      'PLO Avg (%)','NOSS Avg (%)','NOSS Units Competent','Honours Class',
+      'Total Credits']);
+    students.forEach(s=>{
+      rows.push([s.rank,s.id,s.name,s.programme,
+        ...s.semestres.map(x=>x.gpa.toFixed(2)),
+        s.cgpa.toFixed(2),s.avgMark.toFixed(1),s.compPct,s.compStatus,
+        s.ploAvg,s.nossAvg,s.nossComp+'/6',honClass(s.cgpa),
+        s.totalCredits]);
+    });
+    // Summary footer
+    const avg=key=>(students.reduce((a,b)=>a+b[key],0)/students.length).toFixed(2);
+    rows.push([]);
+    rows.push(['SUMMARY','','','',
+      ...[0,1,2,3,4,5].map(i=>(students.reduce((a,b)=>a+b.semestres[i].gpa,0)/students.length).toFixed(2)),
+      avg('cgpa'),
+      (students.reduce((a,b)=>a+b.avgMark,0)/students.length).toFixed(1),
+      Math.round(students.reduce((a,b)=>a+b.compPct,0)/students.length),
+      '','','','','',''
+    ]);
+  } else if(type==='plo'){
+    filename=`TVET_PLO_Report_${lbl}_${new Date().toISOString().slice(0,10)}.csv`;
+    rows.push(['Rank','Student ID','Name','Status',...PLO_LABELS,'PLO Average (%)']);
+    students.forEach(s=>{
+      rows.push([s.rank,s.id,s.name,s.compStatus,...s.plo.map(v=>v+'%'),s.ploAvg+'%']);
+    });
+    rows.push([]);
+    const avgPLO=PLO_LABELS.map((_,i)=>Math.round(students.reduce((a,b)=>a+b.plo[i],0)/students.length)+'%');
+    rows.push(['COHORT AVG','','','Avg PLO',...avgPLO,Math.round(students.reduce((a,b)=>a+b.ploAvg,0)/students.length)+'%']);
+  } else if(type==='noss'){
+    filename=`TVET_NOSS_Report_${lbl}_${new Date().toISOString().slice(0,10)}.csv`;
+    rows.push(['Rank','Student ID','Name','Status',...NOSS_LABELS,'NOSS Avg (%)','Units Competent (out of 6)']);
+    students.forEach(s=>{
+      rows.push([s.rank,s.id,s.name,s.compStatus,...s.noss.map(v=>v+'% ('+(v>=70?'C':'NYC')+')'),s.nossAvg+'%',s.nossComp]);
+    });
+    rows.push([]);
+    const avgNOSS=NOSS_LABELS.map((_,i)=>Math.round(students.reduce((a,b)=>a+b.noss[i],0)/students.length)+'%');
+    rows.push(['COHORT AVG','','','Avg NOSS',...avgNOSS,Math.round(students.reduce((a,b)=>a+b.nossAvg,0)/students.length)+'%',
+      (students.reduce((a,b)=>a+b.nossComp,0)/students.length).toFixed(1)]);
+  }
+
+  const csv=rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+}
+
+// ════════════════════════════════════════════════════════════════
+// PRINT REPORT (opens full-page print window)
+// ════════════════════════════════════════════════════════════════
+function printReport(){
+  const students=getFilteredStudents();
+  const gf=document.getElementById('group-filter').value;
+  const lbl=groupLabel(gf);
+  const issueDate=new Date().toLocaleDateString('en-MY',{day:'2-digit',month:'long',year:'numeric'});
+  const adv=students.filter(s=>s.compStatus==='Advanced').length;
+  const comp=students.filter(s=>s.compStatus==='Competent').length;
+  const dev=students.filter(s=>s.compStatus==='Developing').length;
+  const req=students.filter(s=>s.compStatus==='Requires Improvement').length;
+  const avgCGPA=(students.reduce((a,b)=>a+b.cgpa,0)/Math.max(1,students.length)).toFixed(2);
+  const avgComp=Math.round(students.reduce((a,b)=>a+b.compPct,0)/Math.max(1,students.length));
+  const avgPLO=Math.round(students.reduce((a,b)=>a+b.ploAvg,0)/Math.max(1,students.length));
+  const avgNOSS=Math.round(students.reduce((a,b)=>a+b.nossAvg,0)/Math.max(1,students.length));
+
+  // Summary KPI boxes
+  const kpiHTML=`
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+    ${[
+      {lbl:'Total Students',val:students.length,color:'#1a3c6e'},
+      {lbl:'Average CGPA',val:avgCGPA,color:'#1a3c6e'},
+      {lbl:'Avg Competency',val:avgComp+'%',color:'#0e7490'},
+      {lbl:'Avg PLO Attainment',val:avgPLO+'%',color:'#0e7490'},
+      {lbl:'Advanced',val:adv+' ('+((adv/Math.max(1,students.length))*100).toFixed(0)+'%)',color:'#1a3c6e'},
+      {lbl:'Competent',val:comp+' ('+((comp/Math.max(1,students.length))*100).toFixed(0)+'%)',color:'#0e7490'},
+      {lbl:'Developing',val:dev+' ('+((dev/Math.max(1,students.length))*100).toFixed(0)+'%)',color:'#d97706'},
+      {lbl:'Req. Improvement',val:req+' ('+((req/Math.max(1,students.length))*100).toFixed(0)+'%)',color:'#dc2626'}
+    ].map(k=>`<div style="border:1px solid #e2e8f0;border-top:3px solid ${k.color};border-radius:5px;padding:7px 10px;text-align:center">
+      <div style="font-size:7pt;color:#64748b;text-transform:uppercase;font-weight:700;letter-spacing:.4px">${k.lbl}</div>
+      <div style="font-size:14pt;font-weight:900;color:${k.color};line-height:1.3">${k.val}</div>
+    </div>`).join('')}
+  </div>`;
+
+  // Main table rows
+  const tableRows=students.map((s,i)=>{
+    const bg=i%2===0?'#fff':'#f8fafc';
+    const sColor=s.compStatus==='Advanced'?'#1a3c6e':s.compStatus==='Competent'?'#0e7490':s.compStatus==='Developing'?'#d97706':'#dc2626';
+    const sBg=s.compStatus==='Advanced'?'#dbeafe':s.compStatus==='Competent'?'#ccfbf1':s.compStatus==='Developing'?'#fef3c7':'#fee2e2';
+    return`<tr style="background:${bg}">
+      <td style="padding:4px 6px;text-align:center;font-weight:700">${s.rank}</td>
+      <td style="padding:4px 6px;font-weight:700;color:#1a3c6e">${s.id}</td>
+      <td style="padding:4px 6px">${s.name}</td>
+      <td style="padding:4px 6px;font-size:7.5pt">${s.programme}</td>
+      ${s.semestres.map(x=>`<td style="padding:4px 6px;text-align:center">${x.gpa.toFixed(2)}</td>`).join('')}
+      <td style="padding:4px 6px;text-align:center;font-weight:900;color:${s.cgpa>=3.5?'#1a3c6e':s.cgpa>=3?'#0e7490':s.cgpa>=2.5?'#d97706':'#dc2626'}">${s.cgpa.toFixed(2)}</td>
+      <td style="padding:4px 6px;text-align:center;font-weight:700;color:${sColor}">${s.compPct}%</td>
+      <td style="padding:4px 6px;text-align:center"><span style="background:${sBg};color:${sColor};padding:1px 5px;border-radius:8px;font-size:7pt;font-weight:700">${s.compStatus}</span></td>
+      <td style="padding:4px 6px;text-align:center;font-weight:700;color:${ploColor(s.ploAvg)}">${s.ploAvg}%</td>
+      <td style="padding:4px 6px;text-align:center;font-size:7.5pt">${honClass(s.cgpa)}</td>
+    </tr>`;
+  }).join('');
+
+  // PLO detail rows
+  const ploRows=students.map((s,i)=>{
+    const bg=i%2===0?'#fff':'#f0fdfa';
+    return`<tr style="background:${bg}">
+      <td style="padding:3px 5px;font-weight:700;text-align:center">#${s.rank}</td>
+      <td style="padding:3px 5px;font-weight:700;color:#1a3c6e">${s.id}</td>
+      <td style="padding:3px 5px">${s.name}</td>
+      ${s.plo.map(v=>`<td style="padding:3px 5px;text-align:center;color:${ploColor(v)};font-weight:600">${v}%</td>`).join('')}
+      <td style="padding:3px 5px;text-align:center;font-weight:900;color:${ploColor(s.ploAvg)}">${s.ploAvg}%</td>
+    </tr>`;
+  }).join('');
+
+  const avgPLOarr=PLO_LABELS.map((_,i)=>Math.round(students.reduce((a,b)=>a+b.plo[i],0)/Math.max(1,students.length)));
+
+  const win=window.open('','_blank','width=1100,height=800');
+  win.document.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>
+  <title>TVET Performance Report — ${lbl}</title>
+  <style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Times New Roman',Times,serif;background:#fff;font-size:9pt;color:#111;padding:12mm 14mm}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  h2{font-size:13pt;font-weight:900;color:#1a3c6e;text-transform:uppercase}
+  h3{font-size:10pt;font-weight:700;color:#0e7490}
+  .sec{font-size:9pt;font-weight:900;color:#1a3c6e;text-transform:uppercase;letter-spacing:.5px;border-left:4px solid #c9991a;padding-left:7px;margin:10px 0 6px}
+  table{width:100%;border-collapse:collapse;font-size:7.5pt}
+  thead tr{background:#1a3c6e;color:#fff}
+  th{padding:5px 5px;text-align:left;font-size:7pt;font-weight:700}
+  td{padding:3px 5px;border-bottom:1px solid #e2e8f0}
+  .tfoot-row td{background:#1a3c6e!important;color:#fff!important;font-weight:900;font-size:7.5pt}
+  .pb{page-break-before:always}
+  </style>
+  </head><body>
+  <!-- HEADER -->
+  <div style="display:flex;align-items:flex-start;gap:12px;border-bottom:3px solid #1a3c6e;padding-bottom:8px;margin-bottom:10px">
+    <div style="width:60px;height:60px;border:2px solid #1a3c6e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#1a3c6e;background:#f0f6ff;flex-shrink:0">JPPKK</div>
+    <div style="flex:1">
+      <h2>Kementerian Pendidikan Tinggi Malaysia</h2>
+      <h3>Jabatan Pendidikan Politeknik dan Kolej Komuniti (JPPKK)</h3>
+      <p style="font-size:7.5pt;color:#64748b">Competency-Based Assessment System 2025 | POLYCC Grading Scale</p>
+    </div>
+    <div style="text-align:right;font-size:7.5pt;color:#64748b">
+      <strong style="font-size:10pt;color:#1a3c6e;display:block;text-transform:uppercase">Performance Report</strong>
+      <span>${lbl}</span><br/>
+      <span>Date: ${issueDate}</span><br/>
+      <span style="background:#f0f6ff;border:1px solid #1a3c6e;padding:1px 6px;border-radius:3px;font-weight:700;color:#1a3c6e;font-size:7pt">JPPKK-RPT-${new Date().getFullYear()}</span>
+    </div>
+  </div>
+  <!-- KPI BOXES -->
+  ${kpiHTML}
+  <!-- MAIN TABLE -->
+  <div class="sec">Academic & Competency Performance Summary</div>
+  <table>
+    <thead><tr>
+      <th>Rank</th><th>ID</th><th>Name</th><th>Programme</th>
+      <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th>
+      <th>CGPA</th><th>Comp%</th><th>Status</th><th>PLO%</th><th>Honours</th>
+    </tr></thead>
+    <tbody>${tableRows}</tbody>
+    <tfoot><tr class="tfoot-row">
+      <td colspan="4">AVERAGE (${students.length} students)</td>
+      ${[0,1,2,3,4,5].map(i=>`<td style="text-align:center">${(students.reduce((a,b)=>a+b.semestres[i].gpa,0)/Math.max(1,students.length)).toFixed(2)}</td>`).join('')}
+      <td style="text-align:center">${avgCGPA}</td>
+      <td style="text-align:center">${avgComp}%</td>
+      <td>—</td>
+      <td style="text-align:center">${avgPLO}%</td>
+      <td>—</td>
+    </tr></tfoot>
+  </table>
+  <!-- PLO TABLE -->
+  <div class="sec pb">PLO Attainment Detail</div>
+  <table>
+    <thead><tr>
+      <th>Rk</th><th>ID</th><th>Name</th>
+      <th>PLO1</th><th>PLO2</th><th>PLO3</th><th>PLO4</th><th>PLO5</th><th>PLO6</th><th>PLO7</th><th>PLO8</th>
+      <th>Avg</th>
+    </tr></thead>
+    <tbody>${ploRows}</tbody>
+    <tfoot><tr class="tfoot-row">
+      <td colspan="3">COHORT AVERAGE</td>
+      ${avgPLOarr.map(v=>`<td style="text-align:center">${v}%</td>`).join('')}
+      <td style="text-align:center">${avgPLO}%</td>
+    </tr></tfoot>
+  </table>
+  <!-- SIGNATURES -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px;padding-top:10px;border-top:1px solid #e2e8f0">
+    <div style="text-align:center">
+      <div style="border-bottom:1px solid #1a3c6e;height:36px;margin-bottom:4px"></div>
+      <strong style="font-size:8pt;color:#1a3c6e">Head of Programme / Academic Advisor</strong>
+      <p style="font-size:7pt;color:#64748b">JPPKK Institution</p>
+      <p style="font-size:7pt;color:#64748b">Date: ${issueDate}</p>
+    </div>
+    <div style="text-align:center">
+      <div style="border-bottom:1px solid #1a3c6e;height:36px;margin-bottom:4px"></div>
+      <strong style="font-size:8pt;color:#1a3c6e">Deputy Director (Academic)</strong>
+      <p style="font-size:7pt;color:#64748b">Jabatan Pendidikan Politeknik dan Kolej Komuniti</p>
+      <p style="font-size:7pt;color:#64748b">Date: ${issueDate}</p>
+    </div>
+  </div>
+  <p style="font-size:6.5pt;color:#94a3b8;text-align:center;margin-top:10px;border-top:1px solid #e2e8f0;padding-top:5px">
+    This report contains simulated demonstration data generated by the TVET CBA Dashboard System. Not an official MOHE document.
+    POLYCC Grading Scale 2025 applied. JPPKK — Jabatan Pendidikan Politeknik dan Kolej Komuniti, Malaysia.
+  </p>
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// ════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',function(){
+  renderStats();
+  renderCharts();
+  applyFilter();
+});
+</script>
+</body>
+</html>
